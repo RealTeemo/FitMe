@@ -9,7 +9,14 @@ import '../models/exercise_model.dart';
 /// - Muscle groups
 /// - Methods for filtering and searching exercises
 final List<Exercise> exercises = [
-  Exercise(id: "1", name: "Push-Ups", category: "Bodyweight", equipment: "None", muscleGroup: "Chest", image: "assets/pushups.png"),
+  Exercise(
+    id: "1",
+    name: "Push-Ups",
+    category: "Strength",
+    equipment: "Body Weight",
+    muscleGroup: "Chest",
+    image: "assets/pushups.png"
+  ),
   Exercise(id: "2", name: "Squats", category: "Strength", equipment: "None", muscleGroup: "Legs", image: "assets/squats.png"),
   Exercise(id: "3", name: "Deadlifts", category: "Strength", equipment: "Barbell", muscleGroup: "Back", image: "assets/deadlifts.png"),
   Exercise(id: "4", name: "Planks", category: "Bodyweight", equipment: "None", muscleGroup: "Core", image: "assets/planks.png"),

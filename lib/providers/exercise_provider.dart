@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../features/data/models/exercise_model.dart';
 import '../features/data/data_sources/exercise_data.dart';
+import 'package:flutter/foundation.dart';
 
 class ExerciseProvider with ChangeNotifier {
   List<Exercise> _exercises = [];
@@ -15,27 +16,69 @@ class ExerciseProvider with ChangeNotifier {
     loadExercises(); // Load any saved exercises
   }
 
-  Future<void> loadExercises() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String>? storedExercises = prefs.getStringList('exercises');
+  // Future<void> loadExercises() async {
+  //   // try {
+  //   //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   //   List<String>? storedExercises = prefs.getStringList('exercises');
       
-      if (storedExercises != null) {
-        final List<Exercise> loadedExercises = storedExercises
-            .map((e) => Exercise.fromJson(jsonDecode(e)))
-            .toList();
-        _exercises = [...exercises, ...loadedExercises]; // Combine default and saved exercises
+  //   //   if (storedExercises != null) {
+  //   //     final List<Exercise> loadedExercises = storedExercises
+  //   //         .map((e) => Exercise.fromJson(jsonDecode(e)))
+  //   //         .toList();
+  //   //     _exercises = [...exercises, ...loadedExercises]; // Combine default and saved exercises
+  //   //   }
+  //   //   notifyListeners();
+  //   // } catch (e) {
+  //   //   _exercises = [...exercises];
+  //   //   print('Error loading exercises: $e');
+  //   // }
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   List<String>? storedData = prefs.getStringList('exercises');
+
+  //   if (storedData != null) {
+  //     _exercises = storedData.map((e) => Exercise.fromJson(jsonDecode(e))).toList();
+  //   } else {
+  //     _exercises = [...exercises]; // ✅ Load prebuilt exercises if no saved exercises exist
+  //   }
+  //   notifyListeners();
+  // }
+
+  Future<void> loadExercises() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String>? storedData = prefs.getStringList('exercises');
+
+  if (storedData != null) {
+    List<Exercise> savedExercises = storedData.map((e) => Exercise.fromJson(jsonDecode(e))).toList();
+
+    // ✅ Ensure prebuilt exercises are included if they are not in saved exercises
+    for (var exercise in exercises) {
+      if (!savedExercises.any((e) => e.id == exercise.id)) {
+        savedExercises.insert(0, exercise);
       }
+    }
+
+    _exercises = savedExercises;
+  } else {
+    _exercises = [...exercises]; // ✅ Load prebuilt exercises if no saved exercises exist
+  }
+
+  notifyListeners();
+}
+
+  void initializeExercises(List<Exercise> initialExercises) {
+    if (_exercises.isEmpty) {
+      _exercises = List.from(initialExercises);
       notifyListeners();
-    } catch (e) {
-      _exercises = [...exercises];
-      print('Error loading exercises: $e');
     }
   }
 
-  void addExercise(Exercise newExercise) {
-    _exercises.add(newExercise);
-    saveExercises();
+  void addExercise(Exercise exercise) {
+    _exercises.add(exercise);
+    notifyListeners();
+  }
+
+  void removeExercise(Exercise exercise) {
+    _exercises.remove(exercise);
     notifyListeners();
   }
 

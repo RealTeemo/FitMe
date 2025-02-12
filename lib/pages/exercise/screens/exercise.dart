@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
+import 'package:work_out_app/pages/exercise/screens/add_exercise_screen.dart';
 import 'package:work_out_app/pages/exercise/widgets/filter_buttons.dart';
-import 'package:work_out_app/features/data/data_sources/exercise_data.dart';
 import 'package:work_out_app/pages/exercise/widgets/add_exercise_dialog.dart';
 import 'package:work_out_app/providers/exercise_provider.dart';
 import 'package:work_out_app/pages/exercise/widgets/exercise_list.dart';
@@ -18,7 +18,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   String? selectedMuscle;
   String searchQuery = '';
 
-  List<Exercise> userExercises = [...exercises]; // Stores default + user-added exercises
+
   
   void _openAddExerciseDialog() {
     showDialog(
@@ -35,15 +35,33 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
 
   Widget build(BuildContext context) {
-
     final exerciseProvider = Provider.of<ExerciseProvider>(context);
     List<Exercise> filteredExercises = exerciseProvider.exercises.where((exercise) {
-      return (selectedCategory == null || exercise.category == selectedCategory) &&
-             (selectedEquipment == null || exercise.equipment == selectedEquipment) &&
-             (selectedMuscle == null || exercise.muscleGroup == selectedMuscle) &&
-             (searchQuery.isEmpty || exercise.name.toLowerCase().contains(searchQuery.toLowerCase()));
+      // Check if exercise matches all selected filters
+      if (selectedCategory != null && 
+          exercise.category != selectedCategory) {
+        return false;
+      }
+      
+      if (selectedEquipment != null && 
+          exercise.equipment != selectedEquipment) {
+        return false;
+      }
+      
+      if (selectedMuscle != null && 
+          exercise.muscleGroup != selectedMuscle) {
+        return false;
+      }
+      
+      if (searchQuery.isNotEmpty && 
+          !exercise.name.toLowerCase().contains(searchQuery.toLowerCase())) {
+        return false;
+      }
+
+      return true;
     }).toList();
 
+    // Pass the filtered exercises to ExerciseList
     return Scaffold(
       body: Column(
         children: [
@@ -51,6 +69,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
+                //search bar
                 Expanded(
                   flex: 90,
                   child: TextField(
@@ -62,17 +81,18 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                       ),
                     ),
                     onChanged: (value) {
-                      setState(() => searchQuery = value);
+                      setState(() => searchQuery = value.trim());
                     },
                   ),
                 ),
                 const SizedBox(width: 10),
+                //add exercise button
                 Expanded(
                   flex: 10,
                   child: SizedBox(
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _openAddExerciseDialog,
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AddExerciseScreen())),
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
@@ -96,7 +116,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                     icon: Icons.category,
                     options: ['Strength','Cardio','Stretching'],
                     selectedValue: selectedCategory,
-                    onChanged: (value) => setState(() => selectedCategory = value),
+                    onChanged: (value){
+                      setState(() => selectedCategory = value);
+                    }
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -123,6 +145,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             ),
           ),
           const SizedBox(height: 10),
+          //exercise list
           Expanded(child: ExerciseList(filteredExercises: filteredExercises)),
         ],
       ),
