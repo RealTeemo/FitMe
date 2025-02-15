@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
 import 'package:work_out_app/features/data/models/routine_model.dart';
 import 'package:work_out_app/pages/routines/screens/exercise_list_screen.dart';
 import 'package:work_out_app/pages/routines/widgets/add_exercise_button.dart';
+import 'package:work_out_app/providers/routine_provider.dart';
 
 class CreateRoutineScreen extends StatefulWidget {
   final Routine? routine; // Optional - for editing existing routine
@@ -18,12 +20,14 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
   late TextEditingController _notesController;
   List<Exercise> selectedExercises = [];
   Set<String> workingMuscles = {};
+  bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
+    _isEditing = widget.routine != null;
     _nameController = TextEditingController(text: widget.routine?.name ?? '');
-    _notesController = TextEditingController();
+    _notesController = TextEditingController(text: widget.routine?.notes ?? '');
     if (widget.routine != null) {
       selectedExercises = List.from(widget.routine!.exercises);
       workingMuscles = Set.from(widget.routine!.targetMuscles);
@@ -41,9 +45,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
     final List<Exercise>? result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExerciseListScreen(
-          selectedExercises: selectedExercises,
-        ),
+        builder: (context) => ExerciseListScreen(selectedExercises: selectedExercises),
       ),
     );
 
@@ -68,16 +70,45 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       );
       return;
     }
-
+    if (selectedExercises.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add at least one exercise'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     final routine = Routine(
       id: widget.routine?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       name: _nameController.text,
+      notes: _notesController.text,
       exercises: selectedExercises,
       targetMuscles: workingMuscles.toList(),
-      exerciseConfigs: {},
+      exerciseConfigs: widget.routine?.exerciseConfigs ?? {},
     );
+    
+    final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
+    
+    if (_isEditing) {
+      routineProvider.updateRoutine(routine);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Routine updated successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      routineProvider.addRoutine(routine);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Routine created successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
 
-    Navigator.pop(context, routine);
+    Navigator.pop(context);
   }
 
   Widget _buildExerciseList() {
@@ -113,11 +144,11 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
         final exercise = selectedExercises[index];
         return Card(
           key: ValueKey(exercise.id),
-          margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           child: ListTile(
             leading: ReorderableDragStartListener(
               index: index,
-              child: Icon(Icons.drag_handle, color: Colors.grey),
+              child: const Icon(Icons.drag_handle, color: Colors.grey),
             ),
             title: Text(exercise.name),
             subtitle: Text('${exercise.muscleGroup} • ${exercise.equipment}'),
@@ -133,6 +164,17 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildWorkingMusclesChips() {
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
+      children: workingMuscles.map((muscle) => Chip(
+        label: Text(muscle),
+        backgroundColor: Colors.blue.withOpacity(0.2),
+      )).toList(),
     );
   }
 
@@ -159,7 +201,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
             TextButton.icon(
               onPressed: _saveRoutine,
               icon: const Icon(Icons.save),
-              label: const Text('Save'),
+              label: Text(_isEditing ? 'Update' : 'Save'),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.blue,
               ),
@@ -168,27 +210,45 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Working Muscles Section
               Row(
                 children: [
-                  Icon(Icons.fitness_center, size: 24),
-                  SizedBox(width: 8),
-                  Text(
+                  const Icon(Icons.fitness_center, size: 24),
+                  const SizedBox(width: 8),
+                  const Text(
                     'Working Muscles',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
-                    icon: Icon(Icons.help_outline),
-                    onPressed: () {}, // TODO: Show help info
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () {
+                      // Show help dialog for working muscles
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Working Muscles'),
+                          content: const Text('This section shows the muscle groups targeted by the exercises in your routine. It updates automatically as you add or remove exercises.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Got it'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
-              if (workingMuscles.isEmpty)
-                Center(
+              const SizedBox(height: 8),
+              if (workingMuscles.isNotEmpty)
+                _buildWorkingMusclesChips()
+              else
+                const Center(
                   child: Padding(
                     padding: EdgeInsets.all(20),
                     child: Text(
@@ -199,18 +259,18 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
                 ),
 
               // Routine Notes Section
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Row(
                 children: [
-                  Icon(Icons.edit_note, size: 24),
-                  SizedBox(width: 8),
-                  Text(
-                    'Routine Note',
+                  const Icon(Icons.edit_note, size: 24),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Routine Notes',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
@@ -225,28 +285,43 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
               ),
 
               // Exercises Section
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.fitness_center, size: 24),
-                      SizedBox(width: 8),
-                      Text(
+                      const Icon(Icons.fitness_center, size: 24),
+                      const SizedBox(width: 8),
+                      const Text(
                         'Exercises',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       IconButton(
-                        icon: Icon(Icons.help_outline),
-                        onPressed: () {}, // TODO: Show help info
+                        icon: const Icon(Icons.help_outline),
+                        onPressed: () {
+                          // Show help dialog for exercises
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Exercises'),
+                              content: const Text('Add exercises to your routine using the + button. You can reorder exercises by dragging them, and remove them using the delete button.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Got it'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
                   AddExerciseButton(onPressed: _addExercise)
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildExerciseList(),
             ],
           ),
