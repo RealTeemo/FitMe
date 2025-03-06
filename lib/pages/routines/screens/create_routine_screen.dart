@@ -88,6 +88,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       exerciseConfigs: widget.routine?.exerciseConfigs ?? {},
     );
     
+    Navigator.pop(context, routine);
     final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
     
     if (_isEditing) {

@@ -14,12 +14,12 @@ class RoutineProvider with ChangeNotifier {
     _loadRoutines(); // ✅ Load existing routines on startup
   }
 
-  void _loadRoutines() {
+  Future<void> _loadRoutines() async {
     _routines = _routineData.routines;
     notifyListeners();
   }
 
-  void addRoutine(Routine routine) {
+  Future<void> addRoutine(Routine routine) async {
     final newRoutine = Routine(
       id: routine.id,
       name: routine.name,
@@ -30,21 +30,21 @@ class RoutineProvider with ChangeNotifier {
     );
 
     _routines.add(newRoutine);
-    _routineData.addRoutine(newRoutine); // Persist to storage
+    await _routineData.addRoutine(newRoutine); // Persist to storage
     notifyListeners();
   }
 
-  void deleteRoutine(String routineId) {
+  Future<void> deleteRoutine(String routineId) async {
     _routines.removeWhere((routine) => routine.id == routineId);
-    _routineData.deleteRoutine(routineId);
+    await _routineData.deleteRoutine(routineId);
     notifyListeners();
   }
 
-  void updateRoutine(Routine updatedRoutine) {
+  Future<void> updateRoutine(Routine updatedRoutine) async {
     final index = _routines.indexWhere((r) => r.id == updatedRoutine.id);
     if (index != -1) {
       _routines[index] = updatedRoutine;
-      _routineData.updateRoutine(updatedRoutine);
+      await _routineData.updateRoutine(updatedRoutine);
       notifyListeners();
     }
   }
