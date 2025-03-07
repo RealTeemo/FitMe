@@ -88,11 +88,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       exerciseConfigs: widget.routine?.exerciseConfigs ?? {},
     );
     
-    Navigator.pop(context, routine);
-    final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
-    
     if (_isEditing) {
-      routineProvider.updateRoutine(routine);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Routine updated successfully'),
@@ -100,7 +96,6 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
         ),
       );
     } else {
-      routineProvider.addRoutine(routine);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Routine created successfully'),
@@ -109,7 +104,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       );
     }
 
-    Navigator.pop(context);
+    Navigator.pop(context, routine);
   }
 
   Widget _buildExerciseList() {

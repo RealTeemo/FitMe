@@ -20,17 +20,17 @@ class RoutineProvider with ChangeNotifier {
   }
 
   Future<void> addRoutine(Routine routine) async {
-    final newRoutine = Routine(
-      id: routine.id,
-      name: routine.name,
-      notes: routine.notes,
-      exercises: List.from(routine.exercises),
-      targetMuscles: List.from(routine.targetMuscles),
-      exerciseConfigs: Map.from(routine.exerciseConfigs),
-    );
+    // final newRoutine = Routine(
+    //   id: routine.id,
+    //   name: routine.name,
+    //   notes: routine.notes,
+    //   exercises: List.from(routine.exercises),
+    //   targetMuscles: List.from(routine.targetMuscles),
+    //   exerciseConfigs: Map.from(routine.exerciseConfigs),
+    // );
 
-    _routines.add(newRoutine);
-    await _routineData.addRoutine(newRoutine); // Persist to storage
+    _routines.add(routine);
+    await _routineData.addRoutine(routine); // Persist to storage
     notifyListeners();
   }
 

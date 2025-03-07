@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
-import 'package:work_out_app/features/data/data_sources/exercise_data.dart';
+import 'package:work_out_app/providers/exercise_provider.dart';
+import 'package:work_out_app/pages/routines/widgets/exercise_image.dart';
 
 class ExerciseListScreen extends StatefulWidget {
   final List<Exercise> selectedExercises;
@@ -16,159 +18,149 @@ class ExerciseListScreen extends StatefulWidget {
 
 class _ExerciseListScreenState extends State<ExerciseListScreen> {
   List<Exercise> selectedExercises = [];
-  String searchQuery = '';
-  String? selectedCategory;
-  String? selectedMuscle;
-  String? selectedEquipment;
 
   @override
   void initState() {
     super.initState();
     selectedExercises = List.from(widget.selectedExercises);
-  }
-
-  List<Exercise> get filteredExercises {
-    return exercises.where((exercise) {
-      bool matchesSearch = searchQuery.isEmpty || 
-          exercise.name.toLowerCase().contains(searchQuery.toLowerCase());
-      bool matchesCategory = selectedCategory == null || 
-          exercise.category == selectedCategory;
-      bool matchesMuscle = selectedMuscle == null || 
-          exercise.muscleGroup == selectedMuscle;
-      bool matchesEquipment = selectedEquipment == null || 
-          exercise.equipment == selectedEquipment;
-
-      return matchesSearch && matchesCategory && matchesMuscle && matchesEquipment;
-    }).toList();
+    
+    // Initialize ExerciseProvider with selected exercises
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final exerciseProvider = Provider.of<ExerciseProvider>(context, listen: false);
+      if (exerciseProvider.exercises.isEmpty) {
+        exerciseProvider.loadExercises();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Select Exercises'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, selectedExercises);
-            },
-            child: Text(
-              'Done (${selectedExercises.length})',
-              style: TextStyle(color: Colors.blue),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search exercises...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+    return Consumer<ExerciseProvider>(
+      builder: (context, exerciseProvider, child) {
+        final List<Exercise> filteredExercises = exerciseProvider.getFilteredExercises();
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Select Exercises'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, selectedExercises);
+                },
+                child: Text(
+                  'Done (${selectedExercises.length})',
+                  style: const TextStyle(color: Colors.blue),
                 ),
               ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-            ),
+            ],
           ),
-
-          // Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                FilterChip(
-                  label: Text('Category'),
-                  selected: selectedCategory != null,
-                  onSelected: (bool selected) {
-                    _showFilterOptions(
-                      'Category',
-                      ['Stretching', 'Strength', 'Cardio'],
-                      selectedCategory,
-                      (value) => setState(() => selectedCategory = value),
-                    );
-                  },
-                ),
-                SizedBox(width: 8),
-                FilterChip(
-                  label: Text('Muscle Group'),
-                  selected: selectedMuscle != null,
-                  onSelected: (bool selected) {
-                    _showFilterOptions(
-                      'Muscle Group',
-                      ['Chest', 'Back', 'Legs', 'Arms', 'Core'],
-                      selectedMuscle,
-                      (value) => setState(() => selectedMuscle = value),
-                    );
-                  },
-                ),
-                SizedBox(width: 8),
-                FilterChip(
-                  label: Text('Equipment'),
-                  selected: selectedEquipment != null,
-                  onSelected: (bool selected) {
-                    _showFilterOptions(
-                      'Equipment',
-                      ['None', 'Dumbbells', 'Barbell', 'Machine'],
-                      selectedEquipment,
-                      (value) => setState(() => selectedEquipment = value),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          // Exercise List
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredExercises.length,
-              itemBuilder: (context, index) {
-                final exercise = filteredExercises[index];
-                final isSelected = selectedExercises.contains(exercise);
-
-                return ListTile(
-                  leading: Image.asset(
-                    exercise.image,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                  ),
-                  title: Text(exercise.name),
-                  subtitle: Text(
-                    '${exercise.muscleGroup} • ${exercise.equipment}',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(
-                      isSelected ? Icons.check_circle : Icons.add_circle_outline,
-                      color: isSelected ? Colors.blue : Colors.grey,
+          body: Column(
+            children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search exercises...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        if (isSelected) {
-                          selectedExercises.remove(exercise);
-                        } else {
-                          selectedExercises.add(exercise);
-                        }
-                      });
-                    },
                   ),
-                );
-              },
-            ),
+                  onChanged: (value) => exerciseProvider.setSearchQuery(value),
+                ),
+              ),
+
+              // Filter Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    FilterChip(
+                      label: const Text('Category'),
+                      selected: exerciseProvider.selectedCategory != null,
+                      onSelected: (bool selected) {
+                        _showFilterOptions(
+                          'Category',
+                          ['Stretching', 'Strength', 'Cardio'],
+                          exerciseProvider.selectedCategory,
+                          exerciseProvider.setCategory,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Muscle Group'),
+                      selected: exerciseProvider.selectedMuscle != null,
+                      onSelected: (bool selected) {
+                        _showFilterOptions(
+                          'Muscle Group',
+                          ['Chest', 'Back', 'Legs', 'Arms', 'Core'],
+                          exerciseProvider.selectedMuscle,
+                          exerciseProvider.setMuscleGroup,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Equipment'),
+                      selected: exerciseProvider.selectedEquipment != null,
+                      onSelected: (bool selected) {
+                        _showFilterOptions(
+                          'Equipment',
+                          ['None', 'Dumbbells', 'Barbell', 'Machine'],
+                          exerciseProvider.selectedEquipment,
+                          exerciseProvider.setEquipment,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              // Exercise List
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredExercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = filteredExercises[index];
+                    final isSelected = selectedExercises.contains(exercise);
+
+                    return ListTile(
+                      leading: ExerciseImage(
+                        exercise: exercise,
+                        width: 56,
+                        height: 56,
+                      ),
+                      title: Text(exercise.name),
+                      subtitle: Text(
+                        '${exercise.muscleGroup} • ${exercise.equipment}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                          color: isSelected ? Colors.blue : Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (isSelected) {
+                              selectedExercises.remove(exercise);
+                            } else {
+                              selectedExercises.add(exercise);
+                            }
+                          });
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -188,18 +180,18 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
               ListTile(
                 title: Text(title),
                 trailing: TextButton(
-                  child: Text('Clear'),
+                  child: const Text('Clear'),
                   onPressed: () {
                     onChanged(null);
                     Navigator.pop(context);
                   },
                 ),
               ),
-              Divider(),
+              const Divider(),
               ...options.map((option) => ListTile(
                 title: Text(option),
                 trailing: selectedValue == option
-                    ? Icon(Icons.check, color: Colors.blue)
+                    ? const Icon(Icons.check, color: Colors.blue)
                     : null,
                 onTap: () {
                   onChanged(option);

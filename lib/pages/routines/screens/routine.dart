@@ -3,6 +3,9 @@ import 'package:work_out_app/features/data/models/routine_model.dart';
 import 'package:work_out_app/pages/routines/widgets/routine_card.dart';
 import 'package:work_out_app/pages/routines/screens/create_routine_screen.dart';
 import 'package:work_out_app/features/data/data_sources/routine_data.dart';
+import 'package:provider/provider.dart';
+import 'package:work_out_app/providers/routine_provider.dart';
+
 
 /// Main screen for managing workout routines.
 /// 
@@ -145,6 +148,7 @@ class _RoutineScreenState extends State<RoutineScreen> {
   }
 
   void _showCreateRoutineDialog() async {
+    // final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
     final Routine? newRoutine = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -166,6 +170,8 @@ class _RoutineScreenState extends State<RoutineScreen> {
           duration: const Duration(milliseconds: 300),
         );
       });
+
+      // routineProvider.addRoutine(newRoutine);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
