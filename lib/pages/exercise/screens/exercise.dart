@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
 import 'package:work_out_app/pages/exercise/screens/add_exercise_screen.dart';
 import 'package:work_out_app/pages/exercise/widgets/filter_buttons.dart';
-import 'package:work_out_app/pages/exercise/widgets/add_exercise_dialog.dart';
+import 'package:work_out_app/pages/exercise/screens/add_exercise_dialog.dart';
 import 'package:work_out_app/providers/exercise_provider.dart';
 import 'package:work_out_app/pages/exercise/widgets/exercise_list.dart';
 import 'package:provider/provider.dart';

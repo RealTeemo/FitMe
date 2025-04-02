@@ -45,7 +45,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
     final List<Exercise>? result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExerciseListScreen(selectedExercises: selectedExercises),
+        builder: (context) => ExerciseListScreen(initialSelectedExercises: selectedExercises),
       ),
     );
 
@@ -88,21 +88,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       exerciseConfigs: widget.routine?.exerciseConfigs ?? {},
     );
     
-    if (_isEditing) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Routine updated successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Routine created successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
+    
 
     Navigator.pop(context, routine);
   }

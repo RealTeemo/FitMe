@@ -4,11 +4,16 @@ import 'package:work_out_app/pages/exercise/screens/exercise.dart';
 import 'package:work_out_app/pages/routines/screens/routine.dart';
 import 'package:provider/provider.dart';
 import 'package:work_out_app/providers/exercise_provider.dart';
+import 'package:work_out_app/providers/routine_provider.dart';
 
 void main() {
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => ExerciseProvider()),
-  ], child: WorkoutTaskManagerApp()));
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => ExerciseProvider()),
+      ChangeNotifierProvider(create: (context) => RoutineProvider()),
+    ],
+    child: WorkoutTaskManagerApp(),
+  ));
 }
 
 class WorkoutTaskManagerApp extends StatelessWidget {

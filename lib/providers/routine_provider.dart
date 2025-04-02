@@ -3,7 +3,7 @@ import 'package:work_out_app/features/data/models/routine_model.dart';
 import 'package:work_out_app/features/data/data_sources/routine_data.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
 
-class RoutineProvider with ChangeNotifier {
+class RoutineProvider extends ChangeNotifier {
   final RoutineData _routineData = RoutineData();
   List<Routine> _routines = []; // ✅ Store routines locally
 

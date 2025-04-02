@@ -107,10 +107,11 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
       final exercise = Exercise(
         id: DateTime.now().toString(), // Generate a unique ID
         name: name,
-        category: category,
-        equipment: equipment,
-        muscleGroup: muscleGroup,
-        image: 'assets/placeholder.png', // Default image path
+        // Use the selected values from the state variables
+        category: selectedCategory ?? 'Strength', // Provide a default if null
+        equipment: selectedEquipment ?? 'None',
+        muscleGroup: selectedMuscleGroup ?? 'Chest',
+        image: 'assets/placeholder.png', // Default image path - TODO: Add image picking
       );
 
       // Add the exercise using the provider
