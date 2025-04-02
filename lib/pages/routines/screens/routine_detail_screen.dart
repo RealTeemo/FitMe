@@ -3,6 +3,7 @@ import 'package:work_out_app/features/data/models/routine_model.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
 import 'package:work_out_app/pages/routines/widgets/exercise_config_dialog.dart';
 import 'package:work_out_app/features/data/data_sources/routine_data.dart';
+import 'package:work_out_app/pages/routines/screens/start_exercise_screen.dart';
 /// Displays detailed information about a specific workout routine.
 /// 
 /// Features:
@@ -36,7 +37,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
 
   Future<void> _showExerciseConfig(Exercise exercise) async {
     final currentConfig = exerciseConfigs[exercise.id] ?? {'sets': 3, 'reps': 12};
-    final result = await showDialog<Map<String, int>>(
+    final result = await showDialog<Map<String, int>?>(
       context: context,
       builder: (context) => ExerciseConfigDialog(
         exercise: exercise,
@@ -45,13 +46,22 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
       ),
     );
 
-    if (result != null) {
-      setState(() {
+    if (!mounted) return;
+
+    setState(() {
+      if (result != null) {
         exerciseConfigs[exercise.id] = result;
         widget.routine.exerciseConfigs[exercise.id] = result;
         routineData.updateExerciseConfig(widget.routine.id, exercise.id, result);
-      });
-    }
+      } else {
+        if (exerciseConfigs.containsKey(exercise.id)) {
+          exerciseConfigs.remove(exercise.id);
+          widget.routine.exerciseConfigs.remove(exercise.id);
+          routineData.updateExerciseConfig(widget.routine.id, exercise.id, {});
+          routineData.updateRoutine(widget.routine);
+        }
+      }
+    });
   }
 
   @override
@@ -67,6 +77,14 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
           TextButton.icon(
             onPressed: () {
               // TODO: Implement start workout
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StartExerciseScreen(
+                    routine: widget.routine,
+                  ),
+                ),
+              );
             },
             icon: const Icon(Icons.play_arrow),
             label: const Text('Start'),
@@ -115,58 +133,63 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                 ],
               ),
               SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: widget.routine.exercises.length,
-                itemBuilder: (context, index) {
-                  final exercise = widget.routine.exercises[index];
-                  return Card(
-                    margin: EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[800],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+              // Constrain the height of the ListView
+              SizedBox(
+                height: 250, // Adjust this height based on item size and desired look (approx 3 items)
+                child: ListView.builder(
+                  // Remove shrinkWrap and physics to allow internal scrolling
+                  // shrinkWrap: true, 
+                  // physics: NeverScrollableScrollPhysics(), 
+                  itemCount: widget.routine.exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = widget.routine.exercises[index];
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ),
-                      ),
-                      title: Text(exercise.name),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${exercise.muscleGroup} • ${exercise.equipment}',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          if (exerciseConfigs[exercise.id] != null)
-                            Text(
-                              '${exerciseConfigs[exercise.id]!['sets']} sets × ${exerciseConfigs[exercise.id]!['reps']} reps',
+                          child: Center(
+                            child: Text(
+                              '${index + 1}',
                               style: TextStyle(
-                                color: Colors.blue,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                        ],
+                          ),
+                        ),
+                        title: Text(exercise.name),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${exercise.muscleGroup} • ${exercise.equipment}',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            if (exerciseConfigs[exercise.id] != null)
+                              Text(
+                                '${exerciseConfigs[exercise.id]!['sets']} sets × ${exerciseConfigs[exercise.id]!['reps']} reps',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () => _showExerciseConfig(exercise),
+                        ),
+                        onTap: () => _showExerciseConfig(exercise),
                       ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () => _showExerciseConfig(exercise),
-                      ),
-                      onTap: () => _showExerciseConfig(exercise),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
 
               // Stats Section

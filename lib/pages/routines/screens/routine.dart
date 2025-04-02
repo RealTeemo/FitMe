@@ -4,7 +4,7 @@ import 'package:work_out_app/pages/routines/widgets/routine_card.dart';
 import 'package:work_out_app/pages/routines/screens/create_routine_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:work_out_app/providers/routine_provider.dart';
-
+import 'package:work_out_app/pages/routines/screens/start_exercise_screen.dart';
 /// Main screen for managing workout routines.
 /// 
 /// Features:
@@ -189,7 +189,12 @@ class _RoutineScreenState extends State<RoutineScreen> {
   }
 
   void _startRoutine(Routine routine) {
-    // TODO: Implement routine start functionality
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StartExerciseScreen(routine: routine),
+      ),
+    );
   }
 
   void _deleteRoutine(BuildContext context, Routine routine) async {

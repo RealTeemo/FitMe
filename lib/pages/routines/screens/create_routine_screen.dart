@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:work_out_app/features/data/models/exercise_model.dart';
 import 'package:work_out_app/features/data/models/routine_model.dart';
 import 'package:work_out_app/pages/routines/screens/exercise_list_screen.dart';
 import 'package:work_out_app/pages/routines/widgets/add_exercise_button.dart';
-import 'package:work_out_app/providers/routine_provider.dart';
 
 class CreateRoutineScreen extends StatefulWidget {
   final Routine? routine; // Optional - for editing existing routine

@@ -7,6 +7,8 @@ import 'package:work_out_app/providers/exercise_provider.dart';
 import 'package:work_out_app/providers/routine_provider.dart';
 
 void main() {
+    WidgetsFlutterBinding.ensureInitialized(); 
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => ExerciseProvider()),
@@ -25,7 +27,7 @@ class WorkoutTaskManagerApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         primaryColor: Colors.blue,
         scaffoldBackgroundColor: Colors.black,
-        pageTransitionsTheme: PageTransitionsTheme(
+        pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
             TargetPlatform.android: CupertinoPageTransitionsBuilder(),
             TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
@@ -73,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Workout Task Manager'),
+        title: const Text('Workout Task Manager'),
         centerTitle: true,
       ),
       body: PageView(
@@ -129,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             lineWidth: 13.0,
             animation: true,
             percent: 0.6,
-            center: Text(
+            center: const Text(
               "60%",
               style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: Colors.white),
             ),
@@ -138,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             backgroundColor: Colors.grey[800]!,
           ),
         ),
-        SizedBox(height: 40.0),
+        const SizedBox(height: 40.0),
         _buildButton(context, "Start Workout", Icons.fitness_center, Colors.green),
         _buildButton(context, "Workout History", Icons.history, Colors.orange),
         _buildButton(context, "Set Reminder", Icons.notifications, Colors.blue),
@@ -148,17 +150,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   Widget _buildButton(BuildContext context, String text, IconData icon, Color color) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: 15.0),
+          padding: const EdgeInsets.symmetric(vertical: 15.0),
           backgroundColor: color,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
         icon: Icon(icon, color: Colors.white),
         label: Text(
           text,
-          style: TextStyle(fontSize: 18.0, color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18.0, color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: () {},
       ),

@@ -86,6 +86,13 @@ class _ExerciseConfigDialogState extends State<ExerciseConfigDialog> {
       ),
       actions: [
         TextButton(
+          onPressed: () {
+            // Return null to indicate clearing the configuration
+            Navigator.pop(context, null);
+          },
+          child: Text("Clear")
+        ),
+        TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text('Cancel'),
         ),
