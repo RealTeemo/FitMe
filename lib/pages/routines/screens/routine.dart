@@ -204,7 +204,7 @@ class _RoutineScreenState extends State<RoutineScreen> {
 
     try {
       // Remove from provider
-      await routineProvider.deleteRoutine(routine.id);
+      await routineProvider.deleteRoutine(routine.id.toString());
 
       // Notify AnimatedList about the removal
       _listKey.currentState?.removeItem(

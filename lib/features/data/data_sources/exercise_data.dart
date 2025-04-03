@@ -24,11 +24,3 @@ final List<Exercise> exercises = [
   Exercise(id: "6", name: "Bench Press", category: "Strength", equipment: "Barbell", muscleGroup: "Chest", image: "assets/bench_press.png"),
 
 ];
-
-void addExercise(Exercise exercise) {
-  exercises.add(exercise);
-}
-
-void removeExercise(Exercise exercise) {
-  exercises.remove(exercise);
-}

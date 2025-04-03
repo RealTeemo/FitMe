@@ -52,13 +52,12 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
       if (result != null) {
         exerciseConfigs[exercise.id] = result;
         widget.routine.exerciseConfigs[exercise.id] = result;
-        routineData.updateExerciseConfig(widget.routine.id, exercise.id, result);
+        routineData.updateExerciseConfig(widget.routine.id.toString(), exercise.id, result);
       } else {
         if (exerciseConfigs.containsKey(exercise.id)) {
           exerciseConfigs.remove(exercise.id);
           widget.routine.exerciseConfigs.remove(exercise.id);
-          routineData.updateExerciseConfig(widget.routine.id, exercise.id, {});
-          routineData.updateRoutine(widget.routine);
+          routineData.updateExerciseConfig(widget.routine.id.toString(), exercise.id, {});
         }
       }
     });

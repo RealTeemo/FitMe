@@ -10,7 +10,7 @@ import 'package:work_out_app/features/data/models/exercise_model.dart';
 /// - Optional notes for the routine
 /// - Optional image URL
 class Routine {
-  final String id;
+  final int? id;
   final String name;
   final List<Exercise> exercises;
   final List<String> targetMuscles;
@@ -31,7 +31,7 @@ class Routine {
   // Create a Routine from JSON data
   factory Routine.fromJson(Map<String, dynamic> json) {
     return Routine(
-      id: json['id'] as String,
+      id: json['id'] as int?,
       name: json['name'] as String,
       exercises: (json['exercises'] as List<dynamic>)
           .map((e) => Exercise.fromJson(e as Map<String, dynamic>))

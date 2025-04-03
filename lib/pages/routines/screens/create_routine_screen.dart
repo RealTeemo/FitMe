@@ -78,7 +78,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
       return;
     }
     final routine = Routine(
-      id: widget.routine?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.routine?.id ?? DateTime.now().millisecondsSinceEpoch.toInt(),
       name: _nameController.text,
       notes: _notesController.text,
       exercises: selectedExercises,

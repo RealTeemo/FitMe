@@ -7,7 +7,7 @@ import 'package:work_out_app/providers/exercise_provider.dart';
 import 'package:work_out_app/providers/routine_provider.dart';
 
 void main() {
-    WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized(); 
 
   runApp(MultiProvider(
     providers: [
